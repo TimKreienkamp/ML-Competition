@@ -59,7 +59,8 @@ noFeats <- dim(data)[2]
 #set the number of cv Buckets
 noBuckets <- 10
 
-#hyperparameters we want to optimize over
+#hyperparameters we want to optimize over --- be careful, the lists with the underscores are the short
+# ones and the lists without are the expanded ones
 ntree_List <- c(50, 75, 100, 125, 150, 175, 200, 225, 250)
 sampsize_List <- c(0.8, 0.85, 0.9, 0.95, 1)
 
@@ -76,9 +77,9 @@ colnames(data)[55] <- "Y"
 #set up the grid
 bucketList <- rep(1:noBuckets, length(ntree_List)*length(sampsize_List))
 ntreeList <- rep(ntree_List, (noBuckets*length(sampsize_List)))
-sampsizeList <- rep(sampsize_List[1], ((noBuckets*length(ntree_List)/2)))
-for (i in 2:length(sampsizeList)){
-  sampsizeList <- c(sampsizeList, rep(sampsize_List[i], ((noBuckets*length(ntree_List)/2))))
+sampsizeList <- rep(sampsize_List[1], ((noBuckets*length(ntree_List)/(length(sampsize_List)))))
+for (i in 2:length(sampsize_List)){
+  sampsizeList <- c(sampsizeList, rep(sampsize_List[i], ((noBuckets*length(ntree_List)/(length(sampsize_List))))))
 }
 
 #start the parallel cv
