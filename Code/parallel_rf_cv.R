@@ -104,7 +104,7 @@ results<- foreach(bucket = bucketList, ntree = ntreeList, sampsize = sampsizeLis
                     
                     # train RF
                     
-                    cat(str(Ytrain$Y))
+                    
                     rf_fit <- randomForest(Xtrain, Ytrain$Y, ntree = ntree, replace = F, sampsize = floor(sampsize*length(Ytrain$Y)))
                     trainPredictions <- predict(rf_fit, Xtrain)
                     trainError <- mean(trainPredictions != Ytrain$Y)
