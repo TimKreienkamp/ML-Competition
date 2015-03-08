@@ -4,6 +4,7 @@ Created on Thu Mar  5 16:35:38 2015
 
 @author: timkreienkamp
 """
+# random forest & GLM benchmark
 
 from sklearn.ensemble import GradientBoostingClassifier as gbt
 
