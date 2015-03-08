@@ -77,9 +77,9 @@ colnames(data)[55] <- "Y"
 #set up the grid
 bucketList <- rep(1:noBuckets, length(ntree_List)*length(sampsize_List))
 ntreeList <- rep(ntree_List, (noBuckets*length(sampsize_List)))
-sampsizeList <- rep(sampsize_List[1], ((noBuckets*length(ntree_List)/(length(sampsize_List)))))
+sampsizeList <- rep(sampsize_List[1], (length(ntreeList)/length(sampsize_List)))
 for (i in 2:length(sampsize_List)){
-  sampsizeList <- c(sampsizeList, rep(sampsize_List[i], ((noBuckets*length(ntree_List)/(length(sampsize_List))))))
+  sampsizeList <- c(sampsizeList, rep(sampsize_List[i], (length(ntreeList)/length(sampsize_List))))
 }
 
 #start the parallel cv
@@ -87,20 +87,20 @@ results<- foreach(bucket = bucketList, ntree = ntreeList, sampsize = sampsizeLis
                   .combine=rbind, .packages=c("randomForest", "dplyr")) %dopar% {
                     
                     # some helpful debugging messages
-                    cat("Bucket", bucket, "is the current test set! ntree=", ntree)
+                    cat("Bucket", bucket, "is the current test set! ntree=", ntree, "sampsize = ", sampsize)
                     
                     # subsetting the training phase data
                     Xtrain <- data %>% filter(bucketId != bucket) %>% select(-bucket, -Y)
                     Ytrain <- data %>% filter(bucketId != bucket) %>% select(Y)
                     
                     
-                    cat("Ytrain", length(Ytrain[,1]))
+                    
                     
                     # subsetting the test phase data
                     Xtest <- data %>% filter(bucketId == bucket) %>% select(-bucket, -Y)
                     Ytest <- data %>% filter(bucketId == bucket) %>% select(Y)
                     
-                    cat("Xtrain", length(Xtrain[,1]))
+                    
                     
                     # train RF
                     
