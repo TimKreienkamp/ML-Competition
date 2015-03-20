@@ -135,20 +135,20 @@ write.csv(errorcrossvalidation_factor, file = "errorcrossvalidation_factor.csv")
 ######plotting results
 #=============================================================================#
 notfactor<-read.csv("results/errorcrossvalidation_notfactor.csv", sep=",",header=T)
-png("images/ECV_notfactor.png")
+#png("images/ECV_notfactor.png")
 ggplot(data=notfactor, aes(x=k, y=cvError))+geom_line(size=1, col="darkblue")+xlab("K values")+
   ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is an integer")+
   theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
   theme(plot.title = element_text(lineheight=.8, face="bold"))
-dev.off()
+#dev.off()
 #minimum for: notfactor[notfactor$cvError==min(notfactor[,3]),] => 3 k
 
 
 factor<-read.csv("results/errorcrossvalidation_factor.csv", sep=",",header=T)
-png("images/ECV_factor.png")
+#png("images/ECV_factor.png")
 ggplot(data=factor, aes(x=k, y=cvError))+geom_line(size=1, col="darkred")+xlab("K values")+
   ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is a factor")+
   theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
   theme(plot.title = element_text(lineheight=.8, face="bold"))
-dev.off()
+#dev.off()
 #factor[factor$cvError==min(factor[,3]),]  #minimum also with 3

@@ -6,13 +6,16 @@ if (!require("snow")) install.packages("snow")
 if (!require("foreach")) install.packages("foreach")
 if (!require("doSNOW")) install.packages("doSNOW")
 if (!require("parallel")) install.packages("parallel")
+if (!require("kernlab")) install.packages("kernlab")
 if (!require("e1071")) install.packages("e1071")
+
 library("parallel")
 library("dplyr")
 library("doSNOW")
 library("foreach")
 library("snow")
 library("dplyr")
+library("kernlab")
 library("e1071")
 
 
@@ -37,7 +40,6 @@ data[,55]<-as.factor(data[,55])
 colnames(data)[55]<-"Y"
 #=============================================================================#
 
-
 #=============================================================================#
 #splitting the data into test and training part
 #=============================================================================#
@@ -50,16 +52,31 @@ xtest<-testing[,-55]
 ytest<-as.factor(testing[,55])
 
 #=============================================================================#
-svmm<-list()
-ypred<-list()
-accuracy<-list()
-maxcost<-20
-for(i in 1:maxcost){
-  svmm[[i]] <- svm(Y~.,data=training,scale=F,kernel="radial",cost=i)
-  ypred[[i]] = predict(svmm[[i]],xtest)
-  accuracy[[i]]<-sum(ypred[[i]]==ytest)/length(ytest)  
+#g<-svm(Y~., data=training, type="C-classification", scale=F)
+#accuracyg<- sum(predict(g,xtest)==ytest)/length(ytest)
+#60% of accuracy: small compared if we play with hyperparameters
+#=============================================================================#
 
+
+#=============================================================================#
+#useful link: http://scikit-learn.org/stable/modules/svm.html
+#http://cran.r-project.org/web/packages/e1071/vignettes/svmdoc.pdf
+#=============================================================================#
+sizecost<-seq(1,2,0.5)
+sizesigma<-seq(0.1,0.2,0.1)
+
+results<- foreach(sigma =sizesigma, cost = sizecost, .combine=rbind, .packages=c("kernlab", "dplyr")) %dopar% {
+model_svm<- ksvm(Y~.,data=training,kernel="rbfdot",scaled=F,kpar=list(sigma=sigma),C=cost,cross=10)
+cat(".")
+ypred = predict(model_svm,xtest)
+accuracy<-sum(ypred==ytest)/length(ytest)  
+r<- cbind(sigma, cost, accuracy)
+colnames(r)<-c("Sigma value","Cost value","Accuracy")
+r
 }
-results_1svm<-cbind(seq(1,maxcost,1),as.matrix(accuracy))
-colnames(results_1svm)<-c("Cost of SVM", "Accuracy")
-write.csv(results_1svm, file = "results/SVM_1split_accuracy.csv")
+
+
+
+
+
+
