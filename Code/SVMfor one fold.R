@@ -60,20 +60,6 @@ for(i in 1:maxcost){
   accuracy[[i]]<-sum(ypred[[i]]==ytest)/length(ytest)  
 
 }
-cbind(seq(1,maxcost,1),as.matrix(accuracy))
-
-#=============================================================================#
-
-
-  res <- c(f, C, accuracy) 
-  res
-}
-colnames(svmm) <- c("Fold", "Cost", "Accuracy")
-accuracycrossvalidation_svm<-as.data.frame(svmm) %>% group_by(Cost) %>% summarize(Accuracy=mean(Accuracy))
-
-write.csv(accuracycrossvalidation_svm, file = "accuracycrossvalidation_svm.csv")
-
-
-
-
-
+results_1svm<-cbind(seq(1,maxcost,1),as.matrix(accuracy))
+colnames(results_1svm)<-c("Cost of SVM", "Accuracy")
+write.csv(results_1svm, file = "results/SVM_1split_accuracy.csv")
