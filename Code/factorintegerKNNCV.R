@@ -17,9 +17,8 @@ library(class)
 
 #####
 #three types of distances:
-#setwd("C:/Users/Jéssica/Dropbox/machinelearningproject")
-setwd("C:/Users/jlblabla/Dropbox/machinelearningproject")
-train<-read.csv("Kaggle_Covertype_training.csv", sep=",",header=T)
+setwd("~/GitHub/ML-Competition")
+train<-read.csv("Data/Kaggle_Covertype_training.csv", sep=",",header=T)
 data<-train[,2:56]
 for (i in 1:10){
   data[,i] <- as.numeric(data[,i])
@@ -98,3 +97,26 @@ colnames(resfactor) <- c("testBucket", "k", "Error")
 errorcrossvalidation_factor<-as.data.frame(resfactor) %>% group_by(k) %>% summarize(cvError=mean(Error))
 
 write.csv(errorcrossvalidation_factor, file = "errorcrossvalidation_factor.csv")
+
+
+
+
+######plotting results
+notfactor<-read.csv("results/errorcrossvalidation_notfactor.csv", sep=",",header=T)
+png("images/ECV_notfactor.png")
+ggplot(data=notfactor, aes(x=k, y=cvError))+geom_line(size=1, col="darkblue")+xlab("K values")+
+  ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is an integer")+
+  theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+dev.off()
+#minimum for: notfactor[notfactor$cvError==min(notfactor[,3]),] => 3 k
+
+
+factor<-read.csv("results/errorcrossvalidation_factor.csv", sep=",",header=T)
+png("images/ECV_factor.png")
+ggplot(data=factor, aes(x=k, y=cvError))+geom_line(size=1, col="darkred")+xlab("K values")+
+  ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is a factor")+
+  theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+dev.off()
+#factor[factor$cvError==min(factor[,3]),]  #minimum also with 3
