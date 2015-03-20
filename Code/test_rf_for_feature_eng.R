@@ -35,5 +35,5 @@ rf <- h2o.randomForest(x = c(1:54, 56, 57), #column indices of features
                        covertype.hex, nfolds = 10, sample.rate = 0.9,
                        ntree = 80) 
 
-# look at the overall cross validation error and see if it is better than 0.14
+# look at the overall cross validation error and see if it is better than ~ 0.125
 rf
