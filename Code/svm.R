@@ -4,7 +4,6 @@ if (!require("foreach")) install.packages("foreach")
 if (!require("doSNOW")) install.packages("doSNOW")
 if (!require("parallel")) install.packages("parallel")
 if (!require("e1071")) install.packages("e1071")
-#if (!require("kernlab")) install.packages("kernlab")
 library("parallel")
 library("dplyr")
 library("doSNOW")
@@ -12,11 +11,10 @@ library("foreach")
 library("snow")
 library("dplyr")
 library("e1071")
-#library(kernlab)
 
 #####
-setwd("C:/Users/Jéssica/Dropbox/machinelearningproject")
-train<-read.csv("Kaggle_Covertype_training.csv", sep=",", header=T)
+setwd("~/GitHub/ML-Competition")
+train<-read.csv("Data/Kaggle_Covertype_training.csv", sep=",", header=T)
 data<-train[,2:56]
 
 #####
