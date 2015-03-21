@@ -1,0 +1,79 @@
+---
+title: "Feature Exploration"
+author: "Philipp Schmidt"
+date: "21 Mar 2015"
+output: html_document
+---
+
+# Feature exploration
+
+```{r, echo=FALSE, warning = F, message = F}
+library(caret)
+library(scales)
+library(dplyr)
+library("RColorBrewer")
+library(ggplot2)
+```
+
+Data import
+```{r, warning = F, message = F}
+setwd("/Users/philippschmidt/Documents/ML-Competition")
+train <- read.csv("./Data/Kaggle_Covertype_training.csv")
+```
+
+## Discriptive statistics
+### Mean comparison by groups
+```{r}
+aggregate(train, by = list(train$Cover_Type), FUN = mean)
+```
+
+### SD comparison by groups
+```{r}
+aggregate(train, by = list(train$Cover_Type), FUN = sd)
+```
+
+### Frequency comparison by group
+```{r}
+aggregate(train, by = list(train$Cover_Type), FUN = sum)
+```
+
+## Plotting and variable creation
+
+### Plotting vertical vs. horizontal distance to hyd
+```{r}
+ggplot(train, aes(x=hor_dist_hyd, y=ver_dist_hyd, colour=Cover_Type)) +
+  geom_point(shape=1) +
+  scale_colour_gradientn(colours=rainbow(4))
+```
+
+We find negative values for the vertical distance implying that some areas are below the waterlevel of the nearest surface water features. Following we explore the absolute distance to see whether we find more grouped categories.
+
+### Adding absolute vertical distance from trees to water to the dataset
+```{r}
+train$abs_ver_dist_hyd <- abs(train$ver_dist_hyd)
+```
+
+### Plotting absolute vertical vs. horizontal distance to hyd
+```{r}
+ggplot(train, aes(x=hor_dist_hyd, y=train$abs_ver_dist_hyd, colour=Cover_Type)) +
+  geom_point(shape=1) +
+  scale_colour_gradientn(colours=rainbow(4))
+```
+
+In addition to the absolute vertical distance the total distance to hyd might help to seperate the cover types
+
+### Adding total distance from trees to water to the dataset
+```{r}
+train$tot_dist_hyd <- sqrt((train$hor_dist_hyd)^2 + (train$ver_dist_hyd)^2)
+```
+
+### Plotting total dist to hyd
+```{r}
+ggplot(train, aes(x=train$tot_dist_hyd, y=train$tot_dist_hyd, colour=Cover_Type)) +
+  geom_point(shape=1) +
+  scale_colour_gradientn(colours=rainbow(4))
+```
+
+
+
+
