@@ -1,0 +1,4 @@
+"","Hypothesis Class","Accuracy"
+"1","RF",0.13512
+"2","GBM",0.14154
+"3","Deep Learning",0.12356
