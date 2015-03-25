@@ -6,7 +6,7 @@ localH2o <- h2o.init(ip = "localhost", port = 54321, startH2O = TRUE, max_mem_si
 
 #set wd to where you downloaded the repo
 
-data <- read.csv("./Kaggle_Covertype_training.csv")[,2:56]
+data <- read.csv("./data/Kaggle_Covertype_training.csv")[,2:56]
 
 data$soil_type_15 = NULL
 
