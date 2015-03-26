@@ -102,7 +102,7 @@ ggplot(data=costsvm, aes(x=Cost, y=Accuracy))+geom_line(size=1, col="darkred")+x
 
 
 
-bestCbigC<-svm_cost[max(svm_cost$A),1]
+bestCbigC<-svm_cost[max(svm_cost$Accuracy),1]
 
 
 #===============================
