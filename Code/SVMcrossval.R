@@ -17,7 +17,7 @@ library("parallel"); library("doSNOW"); library("snow")
 
 #==================================================
 #run in amazon
-noCores<-15
+noCores<-3
 cl <- makeCluster(noCores, type="SOCK", outfile="")
 registerDoSNOW(cl)
 
@@ -25,7 +25,8 @@ registerDoSNOW(cl)
 #=============================================================================#
 #reading data
 #=============================================================================#
-train<-read.csv("Kaggle_Covertype_training.csv", sep=",", header=T)
+setwd("C:/Users/Jéssica/Dropbox/machinelearningproject")
+train<-read.csv("Data/Kaggle_Covertype_training.csv", sep=",", header=T)
 data<-train[,2:56]
 
 #=============================================================================#
@@ -62,49 +63,80 @@ idL <- idL[1:nobs]
 data <- data %>% mutate(bucketid=idL) 
 
 
-cost<- seq(1,50,1)
+cost<- seq(0.25,2,0.25)
 Llist <- rep(1:L, length(cost)) 
 costlist <- rep(cost, L) 
 
 svm_cost<- foreach(bucket = Llist, coost = costlist, .combine=rbind, .packages=c("kernlab", "dplyr")) %dopar% {
   xtrain <- data %>% filter(bucketid != bucket) %>% select(-bucket, -Y)
   ytrain <- data %>% filter(bucketid != bucket) %>% select(Y)
-  training<-cbind(xtrain,ytrain)
+  ytrain<-as.factor(as.matrix(ytrain[,1]))
+  xtrain<-as.matrix(xtrain)
   xtest <- data %>% filter(bucketid == bucket) %>% select(-bucket, -Y) 
   ytest <- data %>% filter(bucketid == bucket) %>% select(Y) 
-  model_svm<- ksvm(Y~.,data=training,kernel="rbfdot",scaled=F,kpar=list(sigma=0.01),C=coost)
-  ypred<-predict(model_svm,xtest)
-  accuracy<-sum(ypred==ytest)/length(ytest)  
-  r<- cbind(cost, accuracy)
+  ytest<-as.factor(ytest[,1])
+  model_svm<- ksvm(x=xtrain, y=ytrain,type="spoc-svc",kernel="rbfdot",scaled=F,kpar=list(sigma=0.1),C=coost)
+  ypred<-predict(model_svm,as.matrix(xtest))
+  obs<-as.numeric(ytest)
+  pred<-as.numeric(ypred)
+  accuracy<-sum(pred==obs)/length(ytest)  
+  r<- cbind(coost, accuracy)
   colnames(r)<-c("Cost value","Accuracy")
   r
 }
 colnames(svm_cost) <- c("C", "Accuracy")
 acc_svm_cost<-as.data.frame(svm_cost) %>% group_by(C) %>% summarize(cvAc=mean(Accuracy))
-write.csv(acc_svm_cost, file = "SVM_cost.csv")
+write.csv(acc_svm_cost, file = "results/SVM_cost.csv")
 
-bestC<-5
 
+
+
+costsvm<-read.csv("results/SVM_cost.csv", sep=",",header=T)
+colnames(costsvm)<-c("Cost","Accuracy")
+#png("costsvm.png")
+ggplot(data=costsvm, aes(x=Cost, y=Accuracy))+geom_line(size=1, col="darkred")+xlab("Cost values")+
+  ylab("Cross validation Accuracy")+
+  theme(panel.background = element_rect(fill = 'white', colour = 'grey'))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+#dev.off()
+
+
+
+bestCbigC<-svm_cost[max(svm_cost$A),1]
 
 
 #===============================
-sigma<- seq(1,2,1)
+sigma<- seq(0.1,1,0.1)
 List <- rep(1:L, length(sigma)) 
 sigmalist <- rep(sigma, L) 
 
 svm_sigma<- foreach(bucket = List, sig = sigmalist, .combine=rbind, .packages=c("kernlab", "dplyr")) %dopar% {
   xtrain <- data %>% filter(bucketid != bucket) %>% select(-bucket, -Y)
   ytrain <- data %>% filter(bucketid != bucket) %>% select(Y)
-  training<-cbind(xtrain,ytrain)
+  ytrain<-as.factor(as.matrix(ytrain[,1]))
+  xtrain<-as.matrix(xtrain)
   xtest <- data %>% filter(bucketid == bucket) %>% select(-bucket, -Y) 
   ytest <- data %>% filter(bucketid == bucket) %>% select(Y) 
-  model_svm<- ksvm(Y~.,data=training,kernel="rbfdot",scaled=F,kpar=list(sigma=sig),C=bestC)
-  ypred<-predict(model_svm,xtest)
-  accuracy<-sum(ypred==ytest)/length(ytest)  
-  r<- cbind(cost, accuracy)
-  colnames(r)<-c("Sigma value","Accuracy")
+  ytest<-as.factor(ytest[,1])
+  model_svm<- ksvm(x=xtrain, y=ytrain,type="spoc-svc",kernel="rbfdot",scaled=F,kpar=list(sigma=sig),C=bigC)
+  ypred<-predict(model_svm,as.matrix(xtest))
+  obs<-as.numeric(ytest)
+  pred<-as.numeric(ypred)
+  accuracy<-sum(pred==obs)/length(ytest)  
+  r<- cbind(coost, accuracy)
+  colnames(r)<-c("Cost value","Accuracy")
   r
 }
 colnames(svm_sigma) <- c("S", "Accuracy")
 acc_svm_sigma<-as.data.frame(svm_sigma) %>% group_by(S) %>% summarize(cvAc=mean(Accuracy))
 write.csv(acc_svm_sigma, file = "SVM_sigma.csv")
+
+
+sigmasvm<-read.csv("results/SVM_sigma.csv", sep=",",header=T)
+colnames(sigmasvm)<-c("sigma","Accuracy")
+#png("sigmasvm.png")
+ggplot(data=sigmasvm, aes(x=sigma, y=Accuracy))+geom_line(size=1, col="darkred")+xlab("Sigma values")+
+  ylab("Cross validation Accuracy")+
+  theme(panel.background = element_rect(fill = 'white', colour = 'grey'))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+#dev.off()
