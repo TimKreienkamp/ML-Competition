@@ -35,7 +35,7 @@
 \horrule{2pt} \\[0.5cm] 
 }
 
-\author{Jessica Leal Tim Kreienkamp Philipp Schmidt} 
+\author{Jessica Leal \  \ \ \ Tim Kreienkamp \  \  \  \ Philipp Schmidt} 
 \date{}
 
 \begin{document}
@@ -48,6 +48,7 @@ Here we can explain how the data is, the sources, etc. An introduction of the da
 Initially, we need to establish a benchmark. This is necessary for us to judge all future modeling attempts. A very first, absolute worst case benchmark has already been established by the instructors - The random submission gives an accuracy of about 0.14. We run a random forest in R with no additional parameter tuning on the full dataset. This gives us an accuracy of 0.80. From here on, we intend to make improvements.
 
 \section{Exploratory Analysis}
+
 \section{Experiments}
 In a first set of experiments, we consider several well established classes of hypothesis functions. In particular, we consider Random Forests, Support Vector Machines, k-NN,  Gradient Tree Boosting and Neural Nets (Deep Learning). 
 We first run these over a grid of hyperparameters without any feature engineering. This gives us a feeling for how well different methods are suited for the task at hand. In grid search, one evaluates a classifier over a grid, i.e. the cartesian product of several hyper parameter ranges. This process is computationally intensive, but since the data set is small, we can afford this luxury. The code for these experiments can be found in the files \lstinline{h2o_gridsearches.R}, \lstinline{svm_experiments.R} and \lstinline{knn_experiments.R}. The following figure shows the accuracy of the best model in each class. All accuracy values are obtained by a 10-fold cross validation procedure. 
