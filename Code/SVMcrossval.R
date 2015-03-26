@@ -63,7 +63,7 @@ idL <- idL[1:nobs]
 data <- data %>% mutate(bucketid=idL) 
 
 
-cost<- seq(0.25,2,0.25)
+cost<- c(0.1, 0.2, 0.4, 0.8, 1, 2, 5)
 Llist <- rep(1:L, length(cost)) 
 costlist <- rep(cost, L) 
 
