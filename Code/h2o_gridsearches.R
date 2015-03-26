@@ -7,9 +7,12 @@ data <- read.csv("Kaggle_Covertype_training.csv")[,2:56]
 
 data$soil_type_15 = NULL
 
+
 ################################################################
 #preprocessing
 ################################################################
+=======
+data <- read.csv("./data/Kaggle_Covertype_training.csv")[,2:56]
 
 
 for (i in 1:10){
