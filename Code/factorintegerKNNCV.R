@@ -5,7 +5,6 @@ if (!require("snow")) install.packages("snow")
 if (!require("foreach")) install.packages("foreach")
 if (!require("doSNOW")) install.packages("doSNOW")
 if (!require("parallel")) install.packages("parallel")
-if (!require("randomForest")) install.packages("randomForest")
 library("ggplot2")
 library("parallel")
 library("dplyr")
@@ -134,21 +133,22 @@ write.csv(errorcrossvalidation_factor, file = "errorcrossvalidation_factor.csv")
 #=============================================================================#
 ######plotting results
 #=============================================================================#
-notfactor<-read.csv("results/errorcrossvalidation_notfactor.csv", sep=",",header=T)
+#notfactor<-read.csv("results/errorcrossvalidation_notfactor.csv", sep=",",header=T)
 #png("images/ECV_notfactor.png")
-ggplot(data=notfactor, aes(x=k, y=cvError))+geom_line(size=1, col="darkblue")+xlab("K values")+
-  ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is an integer")+
-  theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
-  theme(plot.title = element_text(lineheight=.8, face="bold"))
+#ggplot(data=notfactor, aes(x=k, y=cvError))+geom_line(size=1, col="darkblue")+xlab("K values")+
+ # ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is an integer")+
+#  theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
+#  theme(plot.title = element_text(lineheight=.8, face="bold"))
 #dev.off()
 #minimum for: notfactor[notfactor$cvError==min(notfactor[,3]),] => 3 k
 
 
-factor<-read.csv("results/errorcrossvalidation_factor.csv", sep=",",header=T)
-#png("images/ECV_factor.png")
+factor<-read.csv("results/knn_error.csv", sep=",",header=T)
+factor<-factor[1:100,]
+png("Doc/ECV_factor.png")
 ggplot(data=factor, aes(x=k, y=cvError))+geom_line(size=1, col="darkred")+xlab("K values")+
-  ylab("Cross validation Error")+ggtitle("Cross-Validation Error\nwhen Y is a factor")+
-  theme(panel.background = element_rect(fill = 'antiquewhite', colour = 'grey'))+
+  ylab("Cross validation Error")+
+  theme(panel.background = element_rect(fill = 'white'))+
   theme(plot.title = element_text(lineheight=.8, face="bold"))
-#dev.off()
+dev.off()
 #factor[factor$cvError==min(factor[,3]),]  #minimum also with 3
