@@ -91,7 +91,7 @@ results_rfe <-  read.csv("./results/results_rfe_rf.csv")[,2:3]
 
 
 linechart_rfe <- ggplot(data=results_rfe, aes(x = NoFeatures, y = Error)) + geom_line()
-ggsave("./doc/barchart_error_neurons.png")
+ggsave("./doc/linechart_results_rfe.png")
 dev.off() 
 
 #################################################################

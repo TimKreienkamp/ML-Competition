@@ -22,7 +22,7 @@ ggplot(data, aes(x=elevation, y=ver_dist_hyd, colour=Cover_Type)) +
 
 
 ggsave(file="./doc/elevation-ver_dist.png")
-
+dev.off()
 ### there appears to be a strong relationship between the vertical distance and elevation within the groups. Thus we create a new variable to account for this relationship which will later be tested for its predictive power. 
 
 ## variable creation
@@ -34,7 +34,7 @@ ggplot(data, aes(x=EVTH, y=ver_dist_hyd, colour=Cover_Type)) +
   scale_colour_gradientn(colours=rainbow(4))
 
 ggsave(file="./doc/EVTH-ver_dist.png")
-
+dev.off()
 
 
 
