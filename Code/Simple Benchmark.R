@@ -21,6 +21,9 @@ for (i in 11:54){
 rf_1 <- randomForest(X_train, y_train, ntree = 200, replace = F, sampsize = floor(0.99*50000))
 
 
+#save to csv
+oob_error_benchmark_rf <- rf_1$err.rate[,1]
+write.csv(oob_error_benchmark_rf, "./results/oob_error_benchmark_rf.csv")
 
 plot(rf_1$err.rate[,1])
 

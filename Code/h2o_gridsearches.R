@@ -1,6 +1,6 @@
 #h2o gridsearch
 
-
+install.packages("h2o")
 library(h2o)
 localH2o <- h2o.init(ip = "localhost", port = 54321, startH2O = TRUE, max_mem_size = '30g', nthreads = -1)
 data <- read.csv("Kaggle_Covertype_training.csv")[,2:56]
@@ -21,6 +21,8 @@ for (i in 1:10){
 
 data[,54] <- as.factor(data[,54])
 
+
+
 ################################################################
 #feature creation
 ################################################################
@@ -39,7 +41,7 @@ data$tot_dist_hyd <- sqrt((data$hor_dist_hyd)^2 + (data$ver_dist_hyd)^2)
 
 #store column indices in variables
 initial_features <- 1:53
-new_features <- 55:57
+new_features <- 55:62
 
 #############
 
@@ -120,16 +122,6 @@ names(accuracies_initial_models) <- c("Hypothesis Class", "Accuracy")
 
 write.csv(accuracies_initial_models, "accuracies_initial.csv" )
 
-# get feature importances from random Forest
-#names of the features
-importances <- best_rf@model$varimp
-#mean decrease in accuracy
-importances_mean_decrease <- as.numeric(importances[1,])
-importances_features <- names(importances)
-# put in data frame and sort
-importances <- data.frame(importances_features, importances_mean_decrease)
-names(importances)  <- c("Feature", "MeanDecreaseAcc")
-importances <- importances[order(-importances$MeanDecreaseAcc),]
 
 
 #get indices of the 40 best features
@@ -139,25 +131,33 @@ best_40_features <- as.character(importances[1:40,1])
   
 # now that we have a better idea of which features perform well let's feed those - and our new features
 # into the deep learning and the random forest
-  
+
+# set a few new parameters
+
+epochs = c(15, 20)
+
 deep_new_features <- h2o.deeplearning(x=c(initial_features, new_features), y=54, data=covertype.hex, nfolds = 10,
                                      hidden=c(200,200,200), # best from grid search
-                                     epochs=15,
+                                     epochs = epochs,
                                      activation="Tanh" # best from grid search
                                      )
 
+max_depth <- c(20, 40, 100)
+ntrees <- c(100, 150)
+
 rf_new_features <- h2o.randomForest(x = c(initial_features, new_features), 
                                    y = 54, 
-                                   ntree = n_trees,
+                                   
                                    data = covertype.hex,
-                                  
                                    sample.rate = 0.9,
+                                   depth = max_depth,
+                                   ntree = ntrees,
                                    importance = T, 
                                    nfolds = 10
                                    )
 ###collect results again
-rf_new_features_acc <- rf_new_features@model$confusion[8,8]
-dl_new_features_acc <- deep_new_features@model$confusion[8,8]
+rf_new_features_acc <- rf_new_features@model[[1]]@model$confusion[8,8]
+dl_new_features_acc <- deep_new_features@model[[1]]@model$confusion[8,8]
 
 models_2 <- c("Random Forest", "Deep Learning")
 accuracies_2 <- c(rf_new_features_acc, dl_new_features_acc)
@@ -168,20 +168,20 @@ write.csv(accuracies_new_features, "accuracies_new_features.csv")
 
 ## deep features ####
 
-deepfeatures_1 <- h2o.deepfeatures(covertype.hex, best_deep)
+deepfeatures_1 <- h2o.deepfeatures(covertype.hex, deep_new_features@model[[1]])
 rf_deep_1 <- h2o.randomForest(x = 2:201, 
                                     y = 1, 
-                                    ntree = n_trees,
+                                    ntree = 150,
                                     data = deepfeatures_1,
-                                    
+                                    depth = 40, 
                                     sample.rate = 0.9,
-                                    importance = T, 
+                                    type = "BigData",
                                     nfolds = 10
 )
-best_rf_deep <- rf_deep_1@model[[1]]
-h2o.saveModel(best_rf_deep, dir = "/home/rstudio")
 
-accuracy_rf_deep <- best_rf_deep@model$confusion[8,8]
+h2o.saveModel(rf_deep_1, dir = "/home/rstudio")
+
+accuracy_rf_deep <- rf_deep_1@model$confusion[8,8]
 data.frame(accuracy_rf_deep)
 write.csv(accuracy_rf_deep, "accuracy_rf_deep")
 
@@ -194,7 +194,7 @@ hidden <- list(c(200, 200, 200, 60), c(200,200, 200, 40), c(200,200,200,20))
 
 deep_several_neurons <- h2o.deeplearning(x=c(initial_features, new_features), y=54, data=covertype.hex, nfolds = 10,
                                       hidden=hidden, 
-                                      epochs=15,
+                                      epochs=20, # best from previous grisearch
                                       activation="Tanh" # best from grid search
 )
 
@@ -205,20 +205,43 @@ best_deep_several_neurons@model$params$hidden
 h2o.saveModel(deep_several_neurons@model[[1]], "deep_60_neurons")
 h2o.saveModel(deep_several_neurons@model[[2]], "deep_40_neurons")
 h2o.saveModel(deep_several_neurons@model[[3]], "deep_20_neurons")
-h2o.saveModel(rf_model, "rf_60_neuros")
 
-deep_60_neurons <- h2o.loadModel(localH2o,"/home/rstudio/deep_60_neurons/Deep60Neuros")
-deep_40_neurons <- h2o.loadModel(localH2o, "/home/rstudio/deep_40_neurons/deep_40_neurons")
-deep_20_neurons <- h2o.loadModel(localH2o, "/home/rstudio/deep_20_neurons/deep_20_neurons")
+deep_60_neurons <- deep_several_neurons@model[[1]]
+deep_40_neurons <- deep_several_neurons@model[[2]]
+deep_20_neurons <- deep_several_neurons@model[[3]]
 
-deepfeatures_2 <- h2o.deepfeatures(covertype.hex, deep_60_neurons)
+#deep_60_neurons <- h2o.loadModel(localH2o,"/home/rstudio/deep_60_neurons/deep_60_neurons")
+#deep_40_neurons <- h2o.loadModel(localH2o, "/home/rstudio/deep_40_neurons/deep_40_neurons")
+#deep_20_neurons <- h2o.loadModel(localH2o, "/home/rstudio/deep_20_neurons/deep_20_neurons")
+
+
+
+deepfeatures_60_neurons <- h2o.deepfeatures(covertype.hex, deep_60_neurons)
 deepfeatures_40_neurons <- h2o.deepfeatures(covertype.hex, deep_40_neurons)
 deepfeatures_20_neurons <- h2o.deepfeatures(covertype.hex, deep_20_neurons)
 
 
-rf_60_neurons <- h2o.randomForest(y = 1, x = 2:61, data = deepfeatures_2, nfolds = 10, ntree = 100, sample.rate = 0.9)
-rf_40_neurons <- h2o.randomForest(y = 1, x = 2:41, data = deepfeatures_40_neurons, nfolds = 10, ntree = 100, sample.rate = 0.9)
-rf_20_neurons <- h2o.randomForest(y = 1, x = 2:21, data = deepfeatures_20_neurons, nfolds = 10, ntree = 100, sample.rate = 0.9)
+rf_60_neurons <- h2o.randomForest(y = 1, x = 2:61, 
+                                  data = deepfeatures_60_neurons, 
+                                  nfolds = 10, 
+                                  ntree = 150, 
+                                  depth = 40, 
+                                  type = "BigData",
+                                  sample.rate = 0.9)
+
+rf_40_neurons <- h2o.randomForest(y = 1, x = 2:41, 
+                                  data = deepfeatures_40_neurons, 
+                                  nfolds = 10, 
+                                  ntree = 150, 
+                                  type = "BigData",
+                                  sample.rate = 0.9)
+
+rf_20_neurons <- h2o.randomForest(y = 1, x = 2:21, 
+                                  data = deepfeatures_20_neurons, 
+                                  nfolds = 10, 
+                                  ntree = 150, 
+                                  type = "BigData",
+                                  sample.rate = 0.9)
 
 
 #save error to csv
@@ -237,7 +260,7 @@ write.csv(error_comparison_neurons, "error_comparison_neurons.csv")
 
 test <- read.csv("Kaggle_Covertype_test.csv")
 test_ids <- test[,1]
-
+test <- test[,2:55]
 
 
 
@@ -245,28 +268,37 @@ for (i in 1:10){
   test[,i] <- as.numeric(test[,i])
 }
 
+for (i in 1:10){
+  test[,i] <- as.numeric(test[,i])
+}
+
 test$EDTH <- test$elevation - test$hor_dist_hyd*0.2
 test$EVTH <-  test$elevation - test$ver_dist_hyd
-
 test$tot_dist_hyd <- sqrt((test$hor_dist_hyd)^2 + (test$ver_dist_hyd)^2)
+test$Hydro_Road_1 <- abs(test$hor_dist_hyd + test$hor_dist_road)
+test$Fire_Road_1 <- abs(test$hor_dist_fire + test$hor_dist_road)
+test$hydro_road_2 <-  abs(test$hor_dist_hyd - test$hor_dist_road)
+test$Fire_Road_2 <- abs(test$hor_dist_fire - test$hor_dist_road)
+
 test$soil_type_15 <- NULL
-test.hex <- as.h2o(localH2o,test[2:57], key = "covertype_test.hex")
+
+test.hex <- as.h2o(localH2o, test, key = "test.hex")
 
 deepfeatures_60_neurons_test <- h2o.deepfeatures(test.hex, deep_60_neurons)
 deepfeatures_40_neurons_test <- h2o.deepfeatures(test.hex, deep_40_neurons)
 
-predictions.hex <- h2o.predict(rf_60_neurons, deepfeatures_60_neurons_test)
+predictions_60_neurons.hex <- h2o.predict(rf_60_neurons, deepfeatures_60_neurons_test)
 predictions_40_neurons <- h2o.predict(rf_40_neurons, deepfeatures_40_neurons_test)
 
-predictions <- as.data.frame(predictions.hex$predict)
+predictions_60_neurons <- as.data.frame(predictions_60_neurons.hex$predict)
 predictions_40_neurons <-  as.data.frame(predictions_40_neurons$predict)
 
-submission_3 <- cbind(test_ids, predictions)
+submission_60_neurons <- cbind(test_ids, predictions_60_neurons)
 submission_40_neurons <- cbind(test_ids, predictions_40_neurons)
 
-names(submission_3) <- c("id", "Cover_Type")
+names(submission_60_neurons) <- c("id", "Cover_Type")
 names(submission_40_neurons) <- c("id", "Cover_Type")
 
-write.csv(submission_3, "submission_3.csv", row.names = F)
+write.csv(submission_60_neurons, "submission_60_neurons.csv", row.names = F)
 write.csv(submission_40_neurons, "submission_40_neurons.csv", row.names = F)
 
