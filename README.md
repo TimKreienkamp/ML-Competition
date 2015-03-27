@@ -7,6 +7,11 @@ This is the repository for Team 2 aka Mr Pink's collaboration on the Machine Lea
 
 This project utilizes h2o, which in turn depends on java. To install a JDK (Java Developer kit) proceed according to your OS.
 
+To run the script, you also need to set your working directory to the folder where you downloaded this repo. 
+
+The code that makes up our (hopefully) winning solution lives in recursive_feature_elimination.R
+
+The report lives in the doc folder.
 # Ubuntu
 
 ```
