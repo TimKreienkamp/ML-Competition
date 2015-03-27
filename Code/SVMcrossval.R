@@ -1,5 +1,5 @@
 #=============================================================================#
-#SVM with no cross-valdation over 10 folds, but just 1 test and train
+#SVM
 #=============================================================================#
 if (!require("ggplot2")) install.packages("ggplot2")
 if (!require("dplyr")) install.packages("dplyr")
