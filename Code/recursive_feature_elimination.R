@@ -97,8 +97,8 @@ while (m > 8){
     
     best_features <- data.frame(best_features)
     
-    write.csv(best_features, "best_features_rfe_rf.csv")
-    write.csv(results_rfe, "results_rfe_rf.csv")
+    write.csv(best_features, "./results/best_features_rfe_rf.csv")
+    write.csv(results_rfe, "./results/results_rfe_rf.csv")
   }
 }
 
@@ -108,7 +108,7 @@ results_rfe <- data.frame(m_vec, error_vec)
 names(results_rfe) <- c("NoFeatures", "Error")
 
 #save results
-write.csv(results_rfe, "results_rfe_rf.csv")
+write.csv(results_rfe, "./results/results_rfe_rf.csv")
 
 
 
