@@ -5,11 +5,29 @@ This is the repository for Team 2 aka Mr Pink's collaboration on the Machine Lea
 
 #Usage
 
-For each commit, please specify a meaningful message, describing in very few words what you added/changed and, if not obvious, why.
+This project utilizes h2o, which in turn depends on java. To install a JDK (Java Developer kit) proceed according to your OS.
+
+# Ubuntu
+
+```
+sudo apt-get update
+sudo apt-get install openjdk-7-jre
+nano ~/.bash_profile
+````
+update the path variable
+```
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64;
+export JRE_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64;
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin:$JRE_HOME/bin;
+```
+reboot and you are good to go!
+
+#Windows 
+see http://docs.oracle.com/javase/7/docs/webnotes/install/windows/jdk-installation-windows.html
+
+# Mac
+
+see http://docs.oracle.com/javase/7/docs/webnotes/install/mac/mac-jdk.html
 
 
-##Folder Structure
 
-If you save the results of experiments to disk, they go into "Results". Everything related to the Report goes into "Doc". 
-Please put only the tex files in there, not the compiled pdf. Code goes into "Code". Submissions go into submissions. For each submission, 
-a description of the method and accuracy obtained via CV and on the test set should be specified. 
