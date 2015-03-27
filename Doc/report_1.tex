@@ -4,7 +4,12 @@
 
 \documentclass[paper=a4, fontsize=11pt]{scrartcl} 
 \usepackage[T1]{fontenc} 
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+ 
+\usepackage[nottoc]{tocbibind}
 \usepackage{fourier} 
+\usepackage{float}
 \usepackage{graphicx}
 \usepackage[english]{babel} 
 \usepackage{amsmath,amsfonts,amsthm} 
@@ -91,17 +96,17 @@ Before considering a unique and a priori thought best classifier, we attempted t
 
 \section{Methods}
 \subsection{K-Nearest Neighbor}
-With this method, we try to classify each new observation in the test set taking into consideration the majority label from its the labels of its a certain number of nearest neighbors (K). In our case, we used the Euclidean distance as a measure of closeness between observations.
+With this method\footnote{Firstly proposed by Fix and Hodges (1951) \cite{knn}}, we try to classify each new observation in the test set taking into consideration the majority label from its the labels of its a certain number of nearest neighbors (K). In our case, we used the Euclidean distance as a measure of closeness between observations.
 
 
 \subsection{Support Vector Machine}
-This algorithm tries to predict the labels of the data set by separating the space into halfspaces - where in each halfspace we have a different label for the observations - with the largest margin (separation) possible. We can also introduce a cost parameter which tends to penalize the misclassification done within the bands. 
+This algorithm\footnote{ SVM was firstly proposed by  Vapnik, V. and Chervonenkis, A. (1963) and soft SVM was proposed by  Cortes C. and Vapnik, V. (1995) \cite{vap}}  tries to predict the labels of the data set by separating the space into halfspaces - where in each halfspace we have a different label for the observations - with the largest margin (separation) possible. We can also introduce a cost parameter which tends to penalize the misclassification done within the bands. 
 
 \subsection{Gradient Boosting}
-This is an algorithm for predicting labels which combines different weak prediction models to create one which is strong, and in our case we used decision trees. So it tries to find the best algrotihm by weighting different functions. Those weights are updated considering the misclassifications. 
+This is an algorithm\footnote{Created by Friedman, J. H. (1999) \cite{Friedman00greedyfunction}} for predicting labels which combines different weak prediction models to create one which is strong, and in our case we used decision trees. So it tries to find the best algrotihm by weighting different functions. Those weights are updated considering the misclassifications. 
 
 \subsection{Random Forest}
-This method tries to create a strong classifier from the weighted sum of different decision trees. In each iteration it considers a random sample with replacement in the training set and fits a decision tree. Then, it considers a small subsets of the features, and we divide the space considering thevariable that best separates the space. We do this procedure for many iterations. 
+This method \footnote{Firstly proposed by Breiman, L. (2001) \cite{random} } tries to create a strong classifier from the weighted sum of different decision trees. In each iteration it considers a random sample with replacement in the training set and fits a decision tree. Then, it considers a small subsets of the features, and we divide the space considering thevariable that best separates the space. We do this procedure for many iterations. 
 
 
 \subsection{Random Forest with deep learning}
@@ -120,7 +125,7 @@ This  method tries to combine the benefits from the Random Forest with the benef
 In a first set of experiments, we consider several well established classes of hypothesis functions. In particular, we consider Random Forests, Support Vector Machines, k-NN,  Gradient Tree Boosting and Neural Nets (Deep Learning). 
 We first run these over a grid of hyperparameters without any feature engineering. This gives us a feeling for how well different methods are suited for the task at hand. In grid search, one evaluates a classifier over a grid, i.e. the cartesian product of several hyper parameter ranges. This process is computationally intensive, but since the data set is small, we can afford this luxury. The code for these experiments can be found in the files \lstinline{h2o_gridsearches.R}, \lstinline{svm_experiments.R} and \lstinline{knn_experiments.R}. The following figure shows the accuracy of the best model in each class. All accuracy values are obtained by a 10-fold cross validation procedure. 
 
-\begin{figure}[p]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{erorrs.png}
     \caption{Initial errors with different methods}
@@ -128,26 +133,7 @@ We first run these over a grid of hyperparameters without any feature engineerin
 \end{figure}
 
 We clearly see that the performance of SVM and k-NN, at least in the tried configuration with this set of features is rather disappointing. Tree based methods  and neural nets however, show - with some parameter tuning - a significant improvement over the baseline. 
- \newpage
-
-
-
-
-DESCRIPTION OF PROCEDURE DONE WITH KNN
- In order to see which hyperparameter k we should use, we use 10-fold cross-validation with different values of k, and we see that considering the label from the training set as a factor or as an integer does not affect our results. The best value of K-NN which minimizes our cross-validation training error is 3. In the case in which Y is a factor, we get an error of 22.01\%; and when Y is an integer we get an error of 22.066\%. We consider the error is quite high in the training set, so this is one of the reasons why we decided to extend our models to take into account. 
-
-
-
-DESCRIPTION OF PROCEDURE DONE WITH SVM
- The package used in this analysis was 'kernlab' with the function 'ksvm'. We decided to use spoc-svc type of classification which deals with multiclasses.  We tried different parameters for the cost parameters of the soft-margin SVM which tend to penalize the misclassification of the observatiosn, leading to a tradeoff of large margin and a small error penalty . The optimal cost to choose is 2. Using this classification we found that our cross-validation error was 20.62\%, which is still high. 
-
-
-
-GRADIENT BOOSTING
-The next method we wanted to try was the Gradient Boosting method\footnote{The package used is 'h2o'}. 
-With this method we try to construct a classification tree of the labels why using one type of loss function, 
-The CV error in this case is 14.154\% which is a great improvement from the previous methods, but it is still not low enough. 
-
+ 
 
 
  % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -174,6 +160,10 @@ Some of the main limitations in this project are
 \section{Conclusions}
 
  % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+\bibliography{randombib}
+	\bibliographystyle{plain}
+
+
 
 
 \end{document}
