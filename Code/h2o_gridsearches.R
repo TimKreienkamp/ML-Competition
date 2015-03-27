@@ -1,8 +1,14 @@
-#h2o gridsearch
-
-install.packages("h2o")
+#set up packages
+if (!require("h2o")) install.packages("h2o")
 library(h2o)
+# start h2o
 localH2o <- h2o.init(ip = "localhost", port = 54321, startH2O = TRUE, max_mem_size = '30g', nthreads = -1)
+
+###############################################################
+#1. load and manipulate the Data
+###############################################################
+
+
 data <- read.csv("Kaggle_Covertype_training.csv")[,2:56]
 
 data$soil_type_15 = NULL
@@ -45,8 +51,16 @@ new_features <- 55:62
 
 #############
 
+
 #convert data to h2o format
 covertype.hex <- as.h2o(localH2o,data, key = "covertype.hex")
+
+
+###############################################################
+#2. grid searches
+###############################################################
+
+
 
 #set parameters for grid searches
 
@@ -88,10 +102,7 @@ grid_search_rf <- h2o.randomForest(x = c(initial_features),
                                    nfolds = 10, 
                                    sample.rate = 0.9,
                                    importance = T
-                                   )
-#save model to disk 
-h2o.saveModel(grid_search_rf@model[[1]], name = "rf_gridsearch_best", dir = "/home/rstudio", save_cv = TRUE, force=FALSE)
-
+            
 
 grid_search_gbm <- h2o.gbm(x = c(initial_features),
                            data = covertype.hex,
@@ -100,9 +111,6 @@ grid_search_gbm <- h2o.gbm(x = c(initial_features),
                            interaction.depth = gbm.depth,
                            nfolds = 10
                            )
-#save model to disk
-h2o.saveModel(grid_search_gbm@model[[1]], name = "gbm_gridsearch_best", dir = "/home/rstudio", save_cv = TRUE, force=FALSE)
-best_gbm <- h2o.loadModel(localH2o, "gbm_gridsearch_best")
 
 
 ### collect accuracies of all models and save in dataframe for viz later
@@ -120,15 +128,14 @@ accuracy <- c(accuracy_best_rf, accuracy_best_gbm, accuracy_best_deep)
 accuracies_initial_models <- data.frame(initial_models, accuracy)
 names(accuracies_initial_models) <- c("Hypothesis Class", "Accuracy")
 
-write.csv(accuracies_initial_models, "accuracies_initial.csv" )
+write.csv(accuracies_initial_models, "./results/accuracies_initial.csv" )
 
 
 
-#get indices of the 40 best features
-best_40_features <- as.character(importances[1:40,1])
+###############################################################
+#3. grid searches with new features
+###############################################################
 
-#save the dataframe to make a plot for the report
-  
 # now that we have a better idea of which features perform well let's feed those - and our new features
 # into the deep learning and the random forest
 
@@ -164,7 +171,15 @@ accuracies_2 <- c(rf_new_features_acc, dl_new_features_acc)
 
 accuracies_new_features <- data.frame(models_2, accuracies_2)
 names(accuracies_new_features) <- c("Hypothesis Class", "Accuracy")
-write.csv(accuracies_new_features, "accuracies_new_features.csv")
+write.csv(accuracies_new_features, "./results/accuracies_new_features.csv")
+
+
+###############################################################
+#4. create deep features
+###############################################################
+
+
+
 
 ## deep features ####
 
@@ -202,18 +217,10 @@ best_deep_several_neurons <- deep_several_neurons@model[[1]]
 best_deep_several_neurons@model$params$hidden
 
 
-h2o.saveModel(deep_several_neurons@model[[1]], "deep_60_neurons")
-h2o.saveModel(deep_several_neurons@model[[2]], "deep_40_neurons")
-h2o.saveModel(deep_several_neurons@model[[3]], "deep_20_neurons")
 
 deep_60_neurons <- deep_several_neurons@model[[1]]
 deep_40_neurons <- deep_several_neurons@model[[2]]
 deep_20_neurons <- deep_several_neurons@model[[3]]
-
-#deep_60_neurons <- h2o.loadModel(localH2o,"/home/rstudio/deep_60_neurons/deep_60_neurons")
-#deep_40_neurons <- h2o.loadModel(localH2o, "/home/rstudio/deep_40_neurons/deep_40_neurons")
-#deep_20_neurons <- h2o.loadModel(localH2o, "/home/rstudio/deep_20_neurons/deep_20_neurons")
-
 
 
 deepfeatures_60_neurons <- h2o.deepfeatures(covertype.hex, deep_60_neurons)
@@ -253,10 +260,17 @@ neurons_last_layer <- c(60,40,20)
 error_vec <- c(rf_60_neurons_error, rf_40_neurons_error, rf_20_neurons_error)
 error_comparison_neurons <- data.frame(neurons_last_layer, error_vec)
 names(error_comparison_neurons) <- c("HiddenUnitsLastLayer", "CvError")
-write.csv(error_comparison_neurons, "error_comparison_neurons.csv")
+write.csv(error_comparison_neurons, "./resultserror_comparison_neurons.csv")
 
 
-#load test data and predict
+
+
+###############################################################
+#5. load test data and predict
+###############################################################
+
+
+
 
 test <- read.csv("Kaggle_Covertype_test.csv")
 test_ids <- test[,1]
